@@ -1,0 +1,9 @@
+{
+  "name": "WebAssembly",
+  "main": "",
+  "type": "module",
+  "scripts": {
+    "server": "node server.js",
+    "test": "node --experimental-wasi-unstable-preview1 wa.js"
+  }
+}

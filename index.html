@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebAssembly</title>
+  </head>
+  <body>
+    <script>
+      const fibonacci = (num) => {
+        if (num <= 1) return 1;
+        return fibonacci(num - 1) + fibonacci(num - 2);
+      };
+
+      const importObject = {
+        env: {
+          js_fibonacci: fibonacci,
+        },
+      };
+
+      WebAssembly.instantiateStreaming(
+        fetch("http://localhost:8000/wasm"),
+        importObject
+      ).then((results) => {
+        const { fibonacci: fib, call_js_fibonacci: js_fib } = results.instance.exports;
+        performance.mark("WA start");
+        fib(41);
+        performance.mark("WA end");
+        performance.measure("WebAssembly Fibonacci", "WA start", "WA end");
+        performance.mark("JS start");
+        js_fib(41);
+        performance.mark("JS end");
+        performance.measure("JS Fibonacci", "JS start", "JS end");
+        performance.mark("Hybrid start");
+        fibonacci(41);
+        performance.mark("Hybrid end");
+        performance.measure("Hybrid Fibonacci", "Hybrid start", "Hybrid end");
+        let p = performance.getEntriesByType("measure");
+        for (let i = 0; i < p.length; i++) {
+          console.log(`${p[i].name} duration = ${p[i].duration}`);
+        }
+        performance.clearMarks();
+        performance.clearMeasures();
+      });
+    </script>
+  </body>
+</html>
